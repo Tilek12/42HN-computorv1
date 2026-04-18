@@ -1,5 +1,6 @@
 import sys
 from parser import parse_equation
+from reducer import reduce_terms, polynomial_degree
 
 
 def main() -> int:
@@ -15,6 +16,13 @@ def main() -> int:
         print("Parsed successfully.")
         print("LHS terms:", lhs_terms)
         print("RHS terms:", rhs_terms)
+
+        coeffs = reduce_terms(lhs_terms, rhs_terms)
+        print("Reduced coefficients:", coeffs)
+
+        degree = polynomial_degree(coeffs)
+        print("Polynomial degree:", degree)
+
         return 0
 
     except Exception as e:
