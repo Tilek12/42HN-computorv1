@@ -13,7 +13,7 @@ def _compact(text: str) -> str:
 
 
 def _split_terms(compact_side: str) -> list[str]:
-    """Split by '+' / '-' and keep the sign with each token."""
+    """Split by '+' / '-' and keep sign on each token."""
     terms: list[str] = []
     start = 0
     for i, ch in enumerate(compact_side):
@@ -35,16 +35,14 @@ def _validate_side_syntax(compact_side: str) -> None:
     if compact_side[-1] in "+-":
         raise ValueError("Invalid syntax: trailing operator")
 
-    # Keep strict behavior from your tests.
     for bad in ("++", "--", "+-", "-+"):
         if bad in compact_side:
             raise ValueError("Invalid syntax: repeated operators")
 
 
-def parse_side(side: str, *, allow_zero_literal: bool) -> list[Term]:
+def parse_side_strict(side: str, *, allow_zero_literal: bool) -> list[Term]:
     """
-    Parse one side of equation into [(coeff, power), ...].
-    Mandatory mode accepts only a*X^p.
+    Parse one side in mandatory strict mode: a*X^p only.
     Right side may accept standalone zero literal if enabled.
     """
     compact_side = _compact(side)
@@ -77,16 +75,14 @@ def parse_side(side: str, *, allow_zero_literal: bool) -> list[Term]:
     return terms
 
 
-def parse_equation(equation: str) -> tuple[list[Term], list[Term]]:
-    """Split and parse equation into left and right term lists."""
+def parse_equation_strict(equation: str) -> tuple[list[Term], list[Term]]:
+    """Split and parse equation in strict mandatory mode."""
     if not equation or not equation.strip():
         raise ValueError("Equation must not be empty")
     if equation.count("=") != 1:
         raise ValueError("Equation must contain exactly one '='")
 
     compact_eq = _compact(equation)
-
-    # Your project mode: require at least one term containing X.
     if "X" not in compact_eq:
         raise ValueError(
             "Mandatory mode requires at least one polynomial term with X "
@@ -99,6 +95,6 @@ def parse_equation(equation: str) -> tuple[list[Term], list[Term]]:
     if not right.strip():
         raise ValueError("Right side is empty")
 
-    lhs_terms = parse_side(left, allow_zero_literal=False)
-    rhs_terms = parse_side(right, allow_zero_literal=True)
+    lhs_terms = parse_side_strict(left, allow_zero_literal=False)
+    rhs_terms = parse_side_strict(right, allow_zero_literal=True)
     return lhs_terms, rhs_terms
