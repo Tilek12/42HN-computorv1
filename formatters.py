@@ -2,7 +2,7 @@ from math_utils import ft_abs, is_zero, ft_fraction_str
 
 
 def format_number(value: float, precision: int = 6) -> str:
-    """Format a float for human-readable output."""
+    """Format float using fixed precision with trimmed trailing zeros."""
     if float(value).is_integer():
         return str(int(value))
     return f"{value:.{precision}f}".rstrip("0").rstrip(".")
@@ -11,12 +11,14 @@ def format_number(value: float, precision: int = 6) -> str:
 def _format_fraction(value: float) -> str:
     return ft_fraction_str(value)
 
+
 def _highest_non_zero_power(coeffs: dict[int, float]) -> int:
     powers = [p for p, c in coeffs.items() if not is_zero(c)]
     return max(powers) if powers else 0
 
 
-def format_reduced_form(coeffs: dict[int, float]) -> str:
+def format_reduced_form(coeffs: dict[int, float], *, precision: int = 6) -> str:
+    """Subject-style reduced form from X^0 up to highest non-zero power."""
     if not coeffs:
         return "0 * X^0 = 0"
 
@@ -27,11 +29,14 @@ def format_reduced_form(coeffs: dict[int, float]) -> str:
     parts: list[str] = []
     for power in range(0, max_power + 1):
         coeff = coeffs.get(power, 0.0)
-        term = f"{format_number(ft_abs(coeff))} * X^{power}"
+        term = f"{format_number(ft_abs(coeff), precision)} * X^{power}"
+
         if not parts:
             parts.append(f"-{term}" if coeff < 0 else term)
         else:
-            parts.append(f"{'-' if coeff < 0 else '+'} {term}")
+            sign = "-" if coeff < 0 else "+"
+            parts.append(f"{sign} {term}")
+
     return " ".join(parts) + " = 0"
 
 

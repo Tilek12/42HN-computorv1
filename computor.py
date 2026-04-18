@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 from parser import parse_equation
 from reducer import reduce_terms, polynomial_degree
@@ -9,6 +8,7 @@ from solver import solve_polynomial
 
 def _build_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Computor v1 polynomial solver")
+
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--strict", action="store_true", help="Use mandatory strict parser (default)")
     mode.add_argument("--free", action="store_true", help="Use bonus free-form parser")
@@ -21,24 +21,33 @@ def _build_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _validate_precision(precision: int) -> None:
+    if precision < 0 or precision > 15:
+        raise ValueError("Precision must be between 0 and 15")
+
+
+def _print_steps(coeffs: dict[int, float], degree: int) -> None:
+    a = coeffs.get(2, 0.0)
+    b = coeffs.get(1, 0.0)
+    c = coeffs.get(0, 0.0)
+    print(f"[steps] a={a}, b={b}, c={c}")
+    if degree == 2:
+        delta = b * b - 4.0 * a * c
+        print(f"[steps] Δ = b² - 4ac = {delta}")
+
+
 def _solve_once(equation: str, parser_mode: str, *, steps: bool, precision: int, fraction: bool) -> int:
     lhs_terms, rhs_terms = parse_equation(equation, mode=parser_mode)
     coeffs = reduce_terms(lhs_terms, rhs_terms)
     degree = polynomial_degree(coeffs)
 
-    print(f"Reduced form: {format_reduced_form(coeffs)}")
+    print(f"Reduced form: {format_reduced_form(coeffs, precision=precision)}")
     print(f"Polynomial degree: {degree}")
 
     result = solve_polynomial(coeffs, degree)
 
     if steps and degree <= 2:
-        a = coeffs.get(2, 0.0)
-        b = coeffs.get(1, 0.0)
-        c = coeffs.get(0, 0.0)
-        print(f"[steps] a={a}, b={b}, c={c}")
-        if degree == 2:
-            delta = b * b - 4.0 * a * c
-            print(f"[steps] Δ = b² - 4ac = {delta}")
+        _print_steps(coeffs, degree)
 
     print(format_solution(result, precision=precision, fraction=fraction))
     return 0
@@ -69,10 +78,10 @@ def _run_repl(parser_mode: str, *, steps: bool, precision: int, fraction: bool) 
                 precision=precision,
                 fraction=fraction,
             )
-        except ValueError as ve:
-            print(f"Input error: {ve}")
-        except Exception as e:
-            print(f"Error: {e}")
+        except ValueError as err:
+            print(f"Input error: {err}")
+        except Exception as err:
+            print(f"Error: {err}")
 
 
 def main() -> int:
@@ -80,6 +89,8 @@ def main() -> int:
     parser_mode = "free" if args.free else "strict"
 
     try:
+        _validate_precision(args.precision)
+
         if args.repl:
             if args.equation:
                 _solve_once(
@@ -114,11 +125,11 @@ def main() -> int:
     except EOFError:
         print("\nNo input provided.")
         return 0
-    except ValueError as ve:
-        print(f"Input error: {ve}")
+    except ValueError as err:
+        print(f"Input error: {err}")
         return 1
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as err:
+        print(f"Error: {err}")
         return 1
 
 

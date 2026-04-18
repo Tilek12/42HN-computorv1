@@ -2,9 +2,7 @@ from math_utils import ft_abs, ft_sqrt, is_zero
 
 
 def _solve_degree_zero(c: float) -> dict:
-    if is_zero(c):
-        return {"kind": "all_real"}
-    return {"kind": "no_solution"}
+    return {"kind": "all_real"} if is_zero(c) else {"kind": "no_solution"}
 
 
 def _solve_degree_one(b: float, c: float) -> dict:
@@ -29,7 +27,6 @@ def _solve_degree_two(a: float, b: float, c: float) -> dict:
             "x2": (-b + sqrt_delta) / denom,
         }
 
-    # delta < 0: complex roots
     denom = 2.0 * a
     real = -b / denom
     imag_abs = ft_sqrt(-delta) / ft_abs(denom)

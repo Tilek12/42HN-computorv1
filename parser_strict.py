@@ -2,18 +2,16 @@ import re
 
 Term = tuple[float, int]
 
-# Mandatory strict term: a*X^p
 TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
 CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
 
 
 def _compact(text: str) -> str:
-    """Remove all whitespace characters."""
     return "".join(text.split())
 
 
 def _split_terms(compact_side: str) -> list[str]:
-    """Split by '+' / '-' and keep sign on each token."""
+    """Split by top-level + and -, keeping sign on each token."""
     terms: list[str] = []
     start = 0
     for i, ch in enumerate(compact_side):
@@ -25,7 +23,6 @@ def _split_terms(compact_side: str) -> list[str]:
 
 
 def _validate_side_syntax(compact_side: str) -> None:
-    """Validate basic operator placement."""
     if not compact_side:
         raise ValueError("Invalid side: empty expression")
     if "=" in compact_side:
@@ -41,10 +38,7 @@ def _validate_side_syntax(compact_side: str) -> None:
 
 
 def parse_side_strict(side: str, *, allow_zero_literal: bool) -> list[Term]:
-    """
-    Parse one side in mandatory strict mode: a*X^p only.
-    Right side may accept standalone zero literal if enabled.
-    """
+    """Parse one side in mandatory strict mode (a*X^p only)."""
     compact_side = _compact(side)
     _validate_side_syntax(compact_side)
 
@@ -76,7 +70,6 @@ def parse_side_strict(side: str, *, allow_zero_literal: bool) -> list[Term]:
 
 
 def parse_equation_strict(equation: str) -> tuple[list[Term], list[Term]]:
-    """Split and parse equation in strict mandatory mode."""
     if not equation or not equation.strip():
         raise ValueError("Equation must not be empty")
     if equation.count("=") != 1:

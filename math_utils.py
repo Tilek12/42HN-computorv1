@@ -37,27 +37,27 @@ def ft_gcd(a: int, b: int) -> int:
 
 def ft_to_fraction(value: float, precision: int = 12) -> tuple[int, int]:
     """
-    Convert float to reduced fraction using decimal rounding.
-    Deterministic and stdlib-independent.
+    Convert float to reduced fraction using rounded decimal representation.
     """
     if is_zero(value):
         return 0, 1
 
+    if precision < 0:
+        precision = 0
+    if precision > 15:
+        precision = 15
+
     sign = -1 if value < 0 else 1
     abs_value = -value if value < 0 else value
 
-    # Round to stable decimal representation first.
     s = f"{abs_value:.{precision}f}"
     if "." not in s:
-        num = int(s) * sign
-        return num, 1
+        return sign * int(s), 1
 
     int_part, frac_part = s.split(".", 1)
     frac_part = frac_part.rstrip("0")
-
-    if frac_part == "":
-        num = int(int_part) * sign
-        return num, 1
+    if not frac_part:
+        return sign * int(int_part), 1
 
     den = 10 ** len(frac_part)
     num = int(int_part) * den + int(frac_part)

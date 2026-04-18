@@ -5,11 +5,6 @@ Term = tuple[float, int]
 
 
 def parse_equation(equation: str, mode: str = "strict") -> tuple[list[Term], list[Term]]:
-    """
-    Dispatcher parser.
-    - strict: mandatory format (a*X^p)
-    - free: bonus free-form input
-    """
     if mode == "strict":
         return parse_equation_strict(equation)
     if mode == "free":
