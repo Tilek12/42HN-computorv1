@@ -8,6 +8,25 @@ TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
 CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
 
 
+def _validate_side_syntax(side: str) -> None:
+    s = side.replace(" ", "")
+    if not s:
+        raise ValueError("Invalid side: empty expression")
+    
+    # Invalid endings like: "2*X^1+" or "2*X^1-"
+    if s[-1] in "+-":
+        raise ValueError("Invalid syntax: trailing operator")
+    
+    # Invalid starts like: "+2*X^1"
+    if s[0] == "+":
+        raise ValueError("Invalid syntax: leading '+' operator")
+    
+    # Reject repeated operators
+    invalid_pairs = ("++", "--", "+-", "-+")
+    if any(pair in s for pair in invalid_pairs):
+        raise ValueError("Invalid syntax: repeated operators")
+
+
 def _split_terms(side: str) -> list[str]:
     """
     Convert:
@@ -22,6 +41,8 @@ def _split_terms(side: str) -> list[str]:
 
 
 def parse_side(side: str) -> list[tuple[float, int]]:
+    _validate_side_syntax(side)
+
     terms: list[tuple[float, int]] = []
 
     for raw_term in _split_terms(side):
