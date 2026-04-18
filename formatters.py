@@ -1,3 +1,6 @@
+from math_utils import ft_abs
+
+
 def format_number(value: float) -> str:
     # Show integers without .0
     if value.is_integer():
@@ -46,7 +49,25 @@ def format_solution(result: dict) -> str:
     if kind == "one_real":
         return f"The solution is:\n{format_number(result['x'])}"
     
-    if kind == "degree_2_pending":
-        return "Degree 2 solver will be implemented in the next step."
+    if kind == "one_real_double":
+        return f"Discriminant is equal to zero, the solution is:\n{format_number(result['x'])}"
+    
+    if kind == "two_real":
+        return (
+            "Discriminant is strictly positive, the two solutions are:\n"
+            f"{format_number(result['x1'])}\n"
+            f"{format_number(result['x2'])}"
+        )
+    
+    if kind == "two_complex":
+        r1, i1 = result["z1"]
+        r2, i2 = result["z2"]
+        s1 = "-" if i1 < 0 else "+"
+        s2 = "-" if i2 < 0 else "+"
+        return (
+            "Discriminant is strictly negative, the two complex solutions are:\n"
+            f"{format_number(r1)} {s1} {format_number(ft_abs(i1))}i\n"
+            f"{format_number(r2)} {s2} {format_number(ft_abs(i2))}i"
+        )
     
     return "Unknown solver state."
