@@ -1,3 +1,5 @@
+import pytest
+
 from parser import parse_equation
 from reducer import reduce_terms, polynomial_degree
 from solver import solve_polynomial
@@ -53,3 +55,15 @@ def test_constant_on_right_side_without_x_power():
     degree, result = solve("1 * X^0 + 2 * X^1 + 5 * X^2 = 0")
     assert degree == 2
     assert result["kind"] == "two_complex"
+
+def test_rhs_zero_literal_is_allowed():
+    degree, result = solve("1 * X^0 + 2 * X^1 + 5 * X^2 = 0")
+    assert degree == 2
+    assert result["kind"] == "two_complex"
+
+def test_constant_only_equation_is_rejected():
+    with pytest.raises(ValueError):
+        parse_equation("0 = 0")
+
+    with pytest.raises(ValueError):
+        parse_equation("1 = 1")

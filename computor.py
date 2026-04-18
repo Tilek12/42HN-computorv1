@@ -32,6 +32,9 @@ def main() -> int:
 
         return 0
 
+    except ValueError as ve:
+        print(f"Input error: {ve}")
+        return 1
     except Exception as e:
         print(f"Error: {e}")
         return 1

@@ -40,6 +40,6 @@ def solve_polynomial(coeffs: dict[int, float], degree: int) -> dict:
     return {
         "kind": "two_complex",
         "delta": delta,
-        "z1": (real, -imag_abs),
-        "z2": (real, imag_abs)
+        "z1": (real, imag_abs),
+        "z2": (real, -imag_abs)
     }

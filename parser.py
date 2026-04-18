@@ -1,79 +1,99 @@
 import re
 
-# Mandatory format term: a * X^p
-# Examples matched:
-#   5 * X^0
-#   -9.3 * X^2
+# Mandatory strict term: a*X^p
 TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
 CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
 
 
-def _validate_side_syntax(side: str) -> None:
-    s = side.replace(" ", "")
-    if not s:
+def _compact(text: str) -> str:
+    return text.replace(" ", "")
+
+
+def _split_terms(compact_side: str) -> list[str]:
+    """
+    Split by + / - while keeping sign with each term.
+    Example:
+      '5*X^0+4*X^1-9.3*X^2' -> ['5*X^0', '+4*X^1', '-9.3*X^2']
+    """
+    terms: list[str] = []
+    start = 0
+    for i, ch in enumerate(compact_side):
+        if i > 0 and ch in "+-":
+            terms.append(compact_side[start:i])
+            start = i
+    terms.append(compact_side[start:])
+    return terms
+
+
+def _validate_side_syntax(compact_side: str) -> None:
+    if not compact_side:
         raise ValueError("Invalid side: empty expression")
-    
-    # Invalid endings like: "2*X^1+" or "2*X^1-"
-    if s[-1] in "+-":
-        raise ValueError("Invalid syntax: trailing operator")
-    
-    # Invalid starts like: "+2*X^1"
-    if s[0] == "+":
+    if "=" in compact_side:
+        raise ValueError("Invalid syntax: unexpected '=' inside side")
+    if compact_side[0] == "+":
         raise ValueError("Invalid syntax: leading '+' operator")
-    
-    # Reject repeated operators
-    invalid_pairs = ("++", "--", "+-", "-+")
-    if any(pair in s for pair in invalid_pairs):
-        raise ValueError("Invalid syntax: repeated operators")
+    if compact_side[-1] in "+-":
+        raise ValueError("Invalid syntax: trailing operator")
+
+    # Reject repeated operators in middle (++, --, +-, -+)
+    for bad in ("++", "--", "+-", "-+"):
+        if bad in compact_side:
+            raise ValueError("Invalid syntax: repeated operators")
 
 
-def _split_terms(side: str) -> list[str]:
-    """
-    Convert:
-      '5 * X^0 + 4 * X^1 - 9.3 * X^2'
-    into:
-      ['5 * X^0', '4 * X^1', '-9.3 * X^2']
-    """
-    # Turn '-' into '+-' then split on '+'
-    normalized = side.strip().replace("-", "+-")
-    parts = [p.strip() for p in normalized.split("+") if p.strip()]
-    return parts
+def parse_side(side: str, *, allow_zero_literal: bool) -> list[tuple[float, int]]:
+    compact_side = _compact(side)
+    _validate_side_syntax(compact_side)
 
-
-def parse_side(side: str) -> list[tuple[float, int]]:
-    _validate_side_syntax(side)
-
+    tokens = _split_terms(compact_side)
     terms: list[tuple[float, int]] = []
 
-    for raw_term in _split_terms(side):
-        compact_term = raw_term.replace(" ", "") # Remove all spaces for regex matching
-        
-        # 1. a*X^p
-        match = TERM_RE.match(compact_term)
-        if match:
-            coefficient = float(match.group(1))
-            power = int(match.group(2))
-            terms.append((coefficient, power))
+    for token in tokens:
+        m = TERM_RE.match(token)
+        if m:
+            coeff = float(m.group(1))
+            power = int(m.group(2))
+            terms.append((coeff, power))
             continue
 
-        # 2. contsant number => X^0
-        const_match = CONST_RE.match(compact_term)
-        if const_match:
-            coefficient = float(const_match.group(1))
-            power = 0
-            terms.append((coefficient, power))
-            continue
+        # Mandatory exception used in subject examples: "... = 0"
+        cm = CONST_RE.match(token)
+        if cm:
+            value = float(cm.group(1))
+            if allow_zero_literal and len(tokens) == 1 and value == 0.0:
+                terms.append((0.0, 0))
+                continue
 
-        raise ValueError(f"Invalid term format: '{raw_term}'")
-    
+        raise ValueError(
+            f"Invalid term format: '{token}'. \n"
+            "Mandatory format is a*X^p (example: 5 * X^0 - 3.2 * X^2). \n"
+            "Only standalone zero is accepted on right side: '= 0'."
+        )
+
     return terms
 
 
 def parse_equation(equation: str) -> tuple[list[tuple[float, int]], list[tuple[float, int]]]:
-    if "=" not in equation:
-        raise ValueError("Equation must contain '='")
+    if not equation or not equation.strip():
+        raise ValueError("Equation must not be empty")
+    if equation.count("=") != 1:
+        raise ValueError("Equation must contain exactly one '='")
 
-    left, right = equation.split("=", 1)
-    lhs_terms = parse_side(left)
-    rhs_terms = parse_side(right)
+    compact_eq = _compact(equation)
+
+    # Mandatory guard: reject constant-only equations like 0=0, 1=1
+    if "X" not in compact_eq:
+        raise ValueError(
+            "Mandatory mode requires at least one polynomial term with X "
+            "(e.g. '1 * X^1 = 0')."
+        )
+
+    left, right = equation.split("=")
+    if not left.strip():
+        raise ValueError("Left side is empty")
+    if not right.strip():
+        raise ValueError("Right side is empty")
+
+    lhs_terms = parse_side(left, allow_zero_literal=False)
+    rhs_terms = parse_side(right, allow_zero_literal=True)
     return lhs_terms, rhs_terms
