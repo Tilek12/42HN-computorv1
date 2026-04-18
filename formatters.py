@@ -29,3 +29,24 @@ def format_reduced_form(coeffs: dict[int, float]) -> str:
             parts.append(f"{sign} {term}")
 
     return " ".join(parts) + " = 0"
+
+
+def format_solution(result: dict) -> str:
+    kind = result["kind"]
+
+    if kind == "unsupported_degree":
+        return "The polynomial degree is strictly greater than 2, I can't solve."
+    
+    if kind == "all_real":
+        return "Any real number is a solution."
+    
+    if kind == "no_solution":
+        return "No solution."
+    
+    if kind == "one_real":
+        return f"The solution is:\n{format_number(result['x'])}"
+    
+    if kind == "degree_2_pending":
+        return "Degree 2 solver will be implemented in the next step."
+    
+    return "Unknown solver state."
