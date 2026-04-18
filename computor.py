@@ -1,6 +1,7 @@
 import sys
 from parser import parse_equation
 from reducer import reduce_terms, polynomial_degree
+from formatters import format_reduced_form
 
 
 def main() -> int:
@@ -12,16 +13,17 @@ def main() -> int:
 
     try:
         lhs_terms, rhs_terms = parse_equation(equation)
+        coeffs = reduce_terms(lhs_terms, rhs_terms)
+        degree = polynomial_degree(coeffs)
 
         print("Parsed successfully.")
         print("LHS terms:", lhs_terms)
         print("RHS terms:", rhs_terms)
-
-        coeffs = reduce_terms(lhs_terms, rhs_terms)
         print("Reduced coefficients:", coeffs)
-
-        degree = polynomial_degree(coeffs)
         print("Polynomial degree:", degree)
+
+        print(f"Reduced form: {format_reduced_form(coeffs)}")
+        print(f"Polynomial degree: {degree}")
 
         return 0
 
