@@ -160,3 +160,28 @@ def test_invalid_bad_operator():
 def test_invalid_trailing_plus():
     with pytest.raises(ValueError):
         parse_equation("2 * X^1 + = 0")
+
+
+def test_invalid_multiple_equal():
+    with pytest.raises(ValueError):
+        parse_equation("1 * X^1 = 2 * X^0 = 3 * X^0")
+
+
+def test_invalid_empty_left_side():
+    with pytest.raises(ValueError):
+        parse_equation("= 0")
+
+
+def test_invalid_empty_right_side():
+    with pytest.raises(ValueError):
+        parse_equation("1 * X^0 =")
+
+
+def test_invalid_leading_plus():
+    with pytest.raises(ValueError):
+        parse_equation("+ 2 * X^1 = 0")
+
+
+def test_invalid_repeated_plus():
+    with pytest.raises(ValueError):
+        parse_equation("1 * X^1 ++ 2 * X^0 = 0")
