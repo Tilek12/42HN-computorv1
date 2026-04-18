@@ -1,3 +1,20 @@
+# Python commands:
+
+1.  ```python3 --version``` - check Python3 version
+2.  ```sudo apt install python3 python3-venv python3-pip``` - install Python3 on Linux
+3.  ```python3 -m venv venv``` - create virtual environment
+4.  ```source venv/bin/activate``` - activate virtual environment on Linux/MacOS
+5.  ```python -m pip install pytest``` - install pytest
+6.  ```python -m pytest --version``` - check pytest version
+7.  ```python -m pytest -q``` - run pytest (-q = quiet output (short))
+8.  ```python -m pytest -v``` - run with details
+9.  ```python -m pytest -v tests/test_mandatory.py``` - run one file only
+10. ```python -m pytest -v tests/test_mandatory.py::test_two_complex``` - run one test only
+11. ```python -m pytest -x``` - stop on first failure
+
+---
+
+
 ```
 computor_v1/
 ├── computor.py          # entrypoint (CLI)
