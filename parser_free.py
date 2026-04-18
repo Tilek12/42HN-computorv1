@@ -14,7 +14,7 @@ def _split_terms(compact_side: str) -> list[str]:
     terms: list[str] = []
     start = 0
     for i, ch in enumerate(compact_side):
-        if i > 0 and ch in "+-":
+        if i > 0 and ch in "+-" and compact_side[i - 1] != "^":
             terms.append(compact_side[start:i])
             start = i
     terms.append(compact_side[start:])
