@@ -6,11 +6,18 @@ from solver import solve_polynomial
 
 
 def main() -> int:
-    # If argument exists, use it. Otherwise read from stdin.
-    if len(sys.argv) > 1:
-        equation = sys.argv[1]
-    else:
-        equation = input("Enter equation: ").strip()
+    try:
+        # If argument exists, use it. Otherwise read from stdin.
+        if len(sys.argv) > 1:
+            equation = sys.argv[1]
+        else:
+            equation = input("Enter equation: ").strip()
+    except KeyboardInterrupt:
+        print("\nInput cancelled.")
+        return 130
+    except EOFError:
+        print("\nNo input provided.")
+        return 0
 
     try:
         lhs_terms, rhs_terms = parse_equation(equation)
