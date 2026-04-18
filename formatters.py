@@ -1,5 +1,4 @@
-from fractions import Fraction
-from math_utils import ft_abs, is_zero
+from math_utils import ft_abs, is_zero, ft_fraction_str
 
 
 def format_number(value: float, precision: int = 6) -> str:
@@ -9,12 +8,8 @@ def format_number(value: float, precision: int = 6) -> str:
     return f"{value:.{precision}f}".rstrip("0").rstrip(".")
 
 
-def _format_fraction(value: float, max_denominator: int = 1_000_000) -> str:
-    f = Fraction(value).limit_denominator(max_denominator)
-    if f.denominator == 1:
-        return str(f.numerator)
-    return f"{f.numerator}/{f.denominator}"
-
+def _format_fraction(value: float) -> str:
+    return ft_fraction_str(value)
 
 def _highest_non_zero_power(coeffs: dict[int, float]) -> int:
     powers = [p for p, c in coeffs.items() if not is_zero(c)]

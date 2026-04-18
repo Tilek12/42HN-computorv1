@@ -24,3 +24,52 @@ def ft_sqrt(value: float, eps: float = EPS, max_iter: int = 10_000) -> float:
         x = nx
 
     raise RuntimeError("ft_sqrt did not converge")
+
+
+def ft_gcd(a: int, b: int) -> int:
+    """Greatest common divisor (Euclidean algorithm)."""
+    a = -a if a < 0 else a
+    b = -b if b < 0 else b
+    while b:
+        a, b = b, a % b
+    return a if a != 0 else 1
+
+
+def ft_to_fraction(value: float, precision: int = 12) -> tuple[int, int]:
+    """
+    Convert float to reduced fraction using decimal rounding.
+    Deterministic and stdlib-independent.
+    """
+    if is_zero(value):
+        return 0, 1
+
+    sign = -1 if value < 0 else 1
+    abs_value = -value if value < 0 else value
+
+    # Round to stable decimal representation first.
+    s = f"{abs_value:.{precision}f}"
+    if "." not in s:
+        num = int(s) * sign
+        return num, 1
+
+    int_part, frac_part = s.split(".", 1)
+    frac_part = frac_part.rstrip("0")
+
+    if frac_part == "":
+        num = int(int_part) * sign
+        return num, 1
+
+    den = 10 ** len(frac_part)
+    num = int(int_part) * den + int(frac_part)
+    num *= sign
+
+    g = ft_gcd(num, den)
+    return num // g, den // g
+
+
+def ft_fraction_str(value: float, precision: int = 12) -> str:
+    """Render float as irreducible fraction string."""
+    num, den = ft_to_fraction(value, precision=precision)
+    if den == 1:
+        return str(num)
+    return f"{num}/{den}"
