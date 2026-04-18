@@ -5,6 +5,7 @@ import re
 #   5 * X^0
 #   -9.3 * X^2
 TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
+CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
 
 
 def _split_terms(side: str) -> list[str]:
@@ -25,14 +26,25 @@ def parse_side(side: str) -> list[tuple[float, int]]:
 
     for raw_term in _split_terms(side):
         compact_term = raw_term.replace(" ", "") # Remove all spaces for regex matching
+        
+        # 1. a*X^p
         match = TERM_RE.match(compact_term)
-        if not match:
-            raise ValueError(f"Invalid term format: '{raw_term}'")
+        if match:
+            coefficient = float(match.group(1))
+            power = int(match.group(2))
+            terms.append((coefficient, power))
+            continue
 
-        coefficient = float(match.group(1))
-        power = int(match.group(2))
-        terms.append((coefficient, power))
+        # 2. contsant number => X^0
+        const_match = CONST_RE.match(compact_term)
+        if const_match:
+            coefficient = float(const_match.group(1))
+            power = 0
+            terms.append((coefficient, power))
+            continue
 
+        raise ValueError(f"Invalid term format: '{raw_term}'")
+    
     return terms
 
 

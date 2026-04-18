@@ -47,3 +47,9 @@ def test_unsupported_degree():
     degree, result = solve("8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0")
     assert degree == 3
     assert result["kind"] == "unsupported_degree"
+
+
+def test_constant_on_right_side_without_x_power():
+    degree, result = solve("1 * X^0 + 2 * X^1 + 5 * X^2 = 0")
+    assert degree == 2
+    assert result["kind"] == "two_complex"
