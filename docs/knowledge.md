@@ -1,251 +1,174 @@
-# Python commands:
+# Computor v1 — Math Knowledge Base
 
-1.  ```python3 --version``` - check Python3 version
-2.  ```sudo apt install python3 python3-venv python3-pip``` - install Python3 on Linux
-3.  ```python3 -m venv venv``` - create virtual environment
-4.  ```source venv/bin/activate``` - activate virtual environment on Linux/MacOS
-5.  ```python -m pip install pytest``` - install pytest
-6.  ```python -m pytest --version``` - check pytest version
-7.  ```python -m pytest -q``` - run pytest (-q = quiet output (short))
-8.  ```python -m pytest -v``` - run with details
-9.  ```python -m pytest -v tests/test_mandatory.py``` - run one file only
-10. ```python -m pytest -v tests/test_mandatory.py::test_two_complex``` - run one test only
-11. ```python -m pytest -x``` - stop on first failure
+## Purpose
+
+This document contains the mathematical background used by Computor v1:
+
+- polynomial normalization
+- degree detection
+- solving rules for degree 0 / 1 / 2
+- discriminant logic
+- precision considerations
 
 ---
 
+## 1) Polynomial model
 
-```
-computor_v1/
-├── computor.py          # entrypoint (CLI)
-├── parser.py            # parse equation string into terms
-├── reducer.py           # move RHS to LHS and combine coefficients by power
-├── solver.py            # solve degree 0/1/2
-├── formatters.py        # reduced-form + solution pretty-print
-├── math_utils.py        # custom sqrt, abs, gcd (for fraction bonus)
-├── models.py            # small data structures (optional)
-└── tests/               # unit tests
-```
+A polynomial equation is reduced to:
 
-# Computor v1 — Knowledge Base
+`a0 * X^0 + a1 * X^1 + ... + an * X^n = 0`
 
-## 1. Project overview
+For Computor v1 (mandatory scope), we solve only:
 
-Computor v1 is a polynomial equation solver for degree 2 or lower.
+- degree `0`
+- degree `1`
+- degree `2`
 
-The program:
-1. Reads an equation
-2. Reduces it to `... = 0`
-3. Detects polynomial degree
-4. Solves the equation based on the degree
-5. Prints the solution(s), including complex solutions for degree 2 when needed
+If degree `> 2`, it is reported as unsupported.
 
 ---
 
-## 2. Input format (mandatory part)
+## 2) Term, coefficient, power
 
-Each term is written like:
+A term has the form:
 
 `a * X^p`
 
 Where:
-- `a` = coefficient (can be integer, decimal, negative, or zero)
-- `X` = variable
-- `p` = exponent (power)
 
-Example:
-
-`5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0`
-
----
-
-## 3. Terminology
-
-- **Term**: one part like `-9.3 * X^2`
-- **Coefficient**: numeric value before `X^p` (`-9.3`)
-- **Exponent / power**: value after `^` (`2`)
-- **Reduced form**: all terms moved to left side, right side becomes `0`
-- **Polynomial degree**: highest exponent with non-zero coefficient
-
----
-
-## 4. Reduction to standard form
-
-The equation is transformed to:
-
-`a * X^2 + b * X^1 + c * X^0 = 0`
-
-General process:
-- Move all right-side terms to the left
-- Change their sign
-- Combine terms with the same exponent
-
-Example:
-
-Input:
-`5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0`
-
-Reduced:
-`4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0`
-
----
-
-## 5. Degree detection
-
-Degree is the highest exponent with coefficient not equal to zero.
+- `a`: coefficient (real number)
+- `p`: exponent/power (`p >= 0`, integer)
+- `X`: unknown
 
 Examples:
-- `0 * X^2 + 4 * X^1 + 1 * X^0 = 0` -> degree `1`
-- `0 * X^2 + 0 * X^1 + 5 * X^0 = 0` -> degree `0`
-- `0 * X^2 + 0 * X^1 + 0 * X^0 = 0` -> special case (`0 = 0`)
-- any non-zero `X^3` term -> degree `3` (not solved in mandatory part)
+
+- `-9.3 * X^2` -> coefficient `-9.3`, power `2`
+- `4 * X^0` -> constant term (`X^0 = 1`)
 
 ---
 
-## 6. Solving by degree
+## 3) Reduction to canonical form
+
+Given:
+
+`L(X) = R(X)`
+
+Move everything to the left:
+
+`L(X) - R(X) = 0`
+
+Then combine coefficients having the same power.
+
+### Sign rule during move
+
+- `+k * X^p` on RHS becomes `-k * X^p` on LHS
+- `-k * X^p` on RHS becomes `+k * X^p` on LHS
+
+---
+
+## 4) Polynomial degree
+
+Degree is the highest power with a non-zero coefficient.
+
+Examples:
+
+- `0*X^2 + 4*X^1 + 1*X^0 = 0` -> degree `1`
+- `0*X^2 + 0*X^1 + 5*X^0 = 0` -> degree `0`
+- all coefficients zero -> degree `0` (identity case)
+
+---
+
+## 5) Solving by degree
 
 ## Degree 0
 
-Form:
-`c = 0`
+Form: `c = 0`
 
-Cases:
-- `c = 0` -> infinitely many solutions (all real numbers)
-- `c != 0` -> no solution
+- if `c = 0` -> infinitely many solutions (all real numbers)
+- if `c != 0` -> no solution
 
 ---
 
 ## Degree 1
 
-Form:
-`b * X + c = 0`
+Form: `b * X + c = 0`
 
-Solution:
+Solution (if `b != 0`):
+
 `X = -c / b`
 
-Example:
-`1 + 4X = 0` -> `X = -1/4 = -0.25`
+If `b = 0`, equation falls back to degree-0 logic.
 
 ---
 
 ## Degree 2
 
-Form:
-`a * X^2 + b * X + c = 0`
+Form: `a * X^2 + b * X + c = 0` with `a != 0`
 
 Discriminant:
+
 `D = b^2 - 4ac`
 
-Cases:
+### Cases
 
-1. `D > 0`  
-   Two real solutions:
-   - `X1 = (-b - sqrt(D)) / (2a)`
-   - `X2 = (-b + sqrt(D)) / (2a)`
+1. `D > 0` -> two real solutions
 
-2. `D = 0`  
-   One real double solution:
-   - `X = -b / (2a)`
+- `X1 = (-b - sqrt(D)) / (2a)`
+- `X2 = (-b + sqrt(D)) / (2a)`
 
-3. `D < 0`  
-   Two complex solutions:
-   - `X1 = (-b / (2a)) - i * sqrt(-D) / (2a)`
-   - `X2 = (-b / (2a)) + i * sqrt(-D) / (2a)`
+2. `D = 0` -> one double real solution
 
----
+- `X = -b / (2a)`
 
-## 7. Complex numbers (minimum needed)
+3. `D < 0` -> two complex conjugate solutions
 
-Complex form:
-`u + vi`
-
-Where:
-- `u` = real part
-- `v` = imaginary coefficient
-- `i^2 = -1`
-
-Used only when discriminant is negative.
-
-Example:
-`1 * X^2 + 2 * X + 5 = 0`
-- `D = 4 - 20 = -16`
-- `X = -1 +/- 2i`
+- `X = -b / (2a) ± i * sqrt(-D) / (2a)`
 
 ---
 
-## 8. Important edge cases
+## 6) Complex numbers (minimum needed)
 
-1. Same both sides:
-   - `6 * X^0 = 6 * X^0`
-   - Reduced: `0 * X^0 = 0`
-   - Result: all real numbers
+Complex number format:
 
-2. Contradiction:
-   - `10 * X^0 = 15 * X^0`
-   - Reduced: `-5 * X^0 = 0`
-   - Result: no solution
+`u + v*i`, where `i^2 = -1`
 
-3. Degree greater than 2:
-   - cannot solve in mandatory part
-
-4. Zero coefficients:
-   - valid and kept during reduction
-   - ignored for degree if coefficient is zero
+In this project, complex values appear only when `D < 0`.
 
 ---
 
-## 9. Sign handling during reduction
+## 7) Precision and epsilon
 
-When moving a term from right to left, sign changes:
+Floating-point arithmetic may introduce tiny residual errors.
 
-- `+k * X^p` on right -> `-k * X^p` on left
-- `-k * X^p` on right -> `+k * X^p` on left
+Use epsilon comparison:
 
-This is critical for correct coefficients.
+- treat value as zero when `abs(value) < eps` (for example `1e-12`)
 
----
+This impacts:
 
-## 10. Precision notes
-
-Floating-point arithmetic can produce tiny errors, like `0.000000000001`.
-
-Common handling:
-- use small epsilon (example: `1e-12`)
-- treat values with `abs(value) < epsilon` as zero
-
-This helps with:
 - degree detection
-- discriminant classification (`D > 0`, `D = 0`, `D < 0`)
+- discriminant classification
+- reduced-form cleanup
 
 ---
 
-## 11. Quick examples
+## 8) Reference edge cases
 
-### Example A — degree 1
-`5 * X^0 + 4 * X^1 = 4 * X^0`  
-Reduced: `1 * X^0 + 4 * X^1 = 0`  
-Solution: `X = -0.25`
+1. `6 * X^0 = 6 * X^0`  
+   Reduced: `0 * X^0 = 0` -> all real numbers.
 
-### Example B — degree 2, positive discriminant
-`4 * X^0 + 4 * X^1 - 9.3 * X^2 = 0`  
-`D > 0` -> two real solutions
+2. `10 * X^0 = 15 * X^0`  
+   Reduced: `-5 * X^0 = 0` -> no solution.
 
-### Example C — degree 2, negative discriminant
-`1 * X^0 + 2 * X^1 + 5 * X^2 = 0`  
-`D = -16` -> two complex solutions: `-1/5 +/- 2i/5`
-
-### Example D — identity
-`0 = 0` -> all real numbers are solutions
-
-### Example E — impossible equation
-`-5 = 0` -> no solution
+3. Non-zero `X^3` term present  
+   Degree `3` -> unsupported in mandatory solver.
 
 ---
 
-## 12. Mental model
+## 9) Mental model
 
-Computor v1 follows one clean pipeline:
+Pipeline:
 
-`parse -> reduce -> combine -> detect degree -> solve -> print result`
+`parse -> reduce -> combine -> degree -> solve`
 
-This model explains the full mandatory part clearly during peer evaluation.
+This is the core mathematical workflow of Computor v1.
