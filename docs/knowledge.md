@@ -1,3 +1,15 @@
+```
+computor_v1/
+├── computor.py          # entrypoint (CLI)
+├── parser.py            # parse equation string into terms
+├── reducer.py           # move RHS to LHS and combine coefficients by power
+├── solver.py            # solve degree 0/1/2
+├── formatters.py        # reduced-form + solution pretty-print
+├── math_utils.py        # custom sqrt, abs, gcd (for fraction bonus)
+├── models.py            # small data structures (optional)
+└── tests/               # unit tests
+```
+
 # Computor v1 — Knowledge Base
 
 ## 1. Project overview
