@@ -1,20 +1,19 @@
 import re
 
+Term = tuple[float, int]
+
 # Mandatory strict term: a*X^p
 TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
 CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
 
 
 def _compact(text: str) -> str:
-    return text.replace(" ", "")
+    """Remove all whitespace characters."""
+    return "".join(text.split())
 
 
 def _split_terms(compact_side: str) -> list[str]:
-    """
-    Split by + / - while keeping sign with each term.
-    Example:
-      '5*X^0+4*X^1-9.3*X^2' -> ['5*X^0', '+4*X^1', '-9.3*X^2']
-    """
+    """Split by '+' / '-' and keep the sign with each token."""
     terms: list[str] = []
     start = 0
     for i, ch in enumerate(compact_side):
@@ -26,6 +25,7 @@ def _split_terms(compact_side: str) -> list[str]:
 
 
 def _validate_side_syntax(compact_side: str) -> None:
+    """Validate basic operator placement."""
     if not compact_side:
         raise ValueError("Invalid side: empty expression")
     if "=" in compact_side:
@@ -35,18 +35,23 @@ def _validate_side_syntax(compact_side: str) -> None:
     if compact_side[-1] in "+-":
         raise ValueError("Invalid syntax: trailing operator")
 
-    # Reject repeated operators in middle (++, --, +-, -+)
+    # Keep strict behavior from your tests.
     for bad in ("++", "--", "+-", "-+"):
         if bad in compact_side:
             raise ValueError("Invalid syntax: repeated operators")
 
 
-def parse_side(side: str, *, allow_zero_literal: bool) -> list[tuple[float, int]]:
+def parse_side(side: str, *, allow_zero_literal: bool) -> list[Term]:
+    """
+    Parse one side of equation into [(coeff, power), ...].
+    Mandatory mode accepts only a*X^p.
+    Right side may accept standalone zero literal if enabled.
+    """
     compact_side = _compact(side)
     _validate_side_syntax(compact_side)
 
     tokens = _split_terms(compact_side)
-    terms: list[tuple[float, int]] = []
+    terms: list[Term] = []
 
     for token in tokens:
         m = TERM_RE.match(token)
@@ -56,7 +61,6 @@ def parse_side(side: str, *, allow_zero_literal: bool) -> list[tuple[float, int]
             terms.append((coeff, power))
             continue
 
-        # Mandatory exception used in subject examples: "... = 0"
         cm = CONST_RE.match(token)
         if cm:
             value = float(cm.group(1))
@@ -65,15 +69,16 @@ def parse_side(side: str, *, allow_zero_literal: bool) -> list[tuple[float, int]
                 continue
 
         raise ValueError(
-            f"Invalid term format: '{token}'. \n"
-            "Mandatory format is a*X^p (example: 5 * X^0 - 3.2 * X^2). \n"
+            f"Invalid term format: '{token}'.\n"
+            "Mandatory format is a*X^p (example: 5 * X^0 - 3.2 * X^2).\n"
             "Only standalone zero is accepted on right side: '= 0'."
         )
 
     return terms
 
 
-def parse_equation(equation: str) -> tuple[list[tuple[float, int]], list[tuple[float, int]]]:
+def parse_equation(equation: str) -> tuple[list[Term], list[Term]]:
+    """Split and parse equation into left and right term lists."""
     if not equation or not equation.strip():
         raise ValueError("Equation must not be empty")
     if equation.count("=") != 1:
@@ -81,14 +86,14 @@ def parse_equation(equation: str) -> tuple[list[tuple[float, int]], list[tuple[f
 
     compact_eq = _compact(equation)
 
-    # Mandatory guard: reject constant-only equations like 0=0, 1=1
+    # Your project mode: require at least one term containing X.
     if "X" not in compact_eq:
         raise ValueError(
             "Mandatory mode requires at least one polynomial term with X "
             "(e.g. '1 * X^1 = 0')."
         )
 
-    left, right = equation.split("=")
+    left, right = equation.split("=", 1)
     if not left.strip():
         raise ValueError("Left side is empty")
     if not right.strip():

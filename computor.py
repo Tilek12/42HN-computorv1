@@ -5,13 +5,16 @@ from formatters import format_reduced_form, format_solution
 from solver import solve_polynomial
 
 
+def _read_equation_from_input() -> str:
+    """Read equation from argv or stdin."""
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    return input("Enter equation: ").strip()
+
+
 def main() -> int:
     try:
-        # If argument exists, use it. Otherwise read from stdin.
-        if len(sys.argv) > 1:
-            equation = sys.argv[1]
-        else:
-            equation = input("Enter equation: ").strip()
+        equation = _read_equation_from_input()
     except KeyboardInterrupt:
         print("\nInput cancelled.")
         return 130
@@ -29,7 +32,6 @@ def main() -> int:
 
         result = solve_polynomial(coeffs, degree)
         print(format_solution(result))
-
         return 0
 
     except ValueError as ve:
