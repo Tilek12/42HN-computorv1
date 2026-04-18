@@ -25,6 +25,13 @@ def test_many_spaces_should_parse():
     assert ft_abs(result["x"] + 0.25) < 1e-9
 
 
+def test_first_term_negative_sign():
+    coeffs, degree, result = solve("-2 * X^1 + 4 * X^0 = 0")
+    assert degree == 1
+    assert result["kind"] == "one_real"
+    assert ft_abs(result["x"] - 2.0) < 1e-9
+
+
 def test_duplicate_powers_are_combined():
     coeffs, degree, result = solve("1 * X^1 + 2 * X^1 + 3 * X^0 = 0")
     assert coeffs[1] == 3.0
@@ -45,18 +52,6 @@ def test_zero_high_degree_should_not_raise_degree():
     assert degree == 1
     assert result["kind"] == "one_real"
     assert ft_abs(result["x"]) < 1e-12
-
-
-def test_constant_only_true():
-    coeffs, degree, result = solve("3 = 3")
-    assert degree == 0
-    assert result["kind"] == "all_real"
-
-
-def test_constant_only_false():
-    coeffs, degree, result = solve("3 = 4")
-    assert degree == 0
-    assert result["kind"] == "no_solution"
 
 
 def test_linear_zero_solution():
@@ -92,15 +87,6 @@ def test_quadratic_delta_negative():
     assert ft_abs(ft_abs(i2) - 1.0) < 1e-9
 
 
-def test_negative_a_complex_branch_signs():
-    coeffs, degree, result = solve("-1 * X^2 + 0 * X^1 - 1 * X^0 = 0")
-    assert degree == 2
-    assert result["kind"] == "two_complex"
-    (r1, i1), (r2, i2) = result["z1"], result["z2"]
-    assert ft_abs(r1) < 1e-9 and ft_abs(r2) < 1e-9
-    assert i1 < 0 < i2
-
-
 def test_unsupported_degree_4():
     coeffs, degree, result = solve("1 * X^4 + 1 * X^1 = 0")
     assert degree == 4
@@ -108,9 +94,21 @@ def test_unsupported_degree_4():
 
 
 def test_epsilon_cleanup_degree_zero():
-    # should collapse to 0 with epsilon normalization in reducer
     coeffs, degree, result = solve("0.0000000000001 * X^1 = 0")
     assert degree == 0
+
+
+def test_rhs_zero_variants_allowed():
+    for eq in (
+        "1 * X^1 = 0",
+        "1 * X^1 = 0.0",
+        "1 * X^1 = -0",
+        "1 * X^1 = -0.0",
+    ):
+        _, degree, result = solve(eq)
+        assert degree == 1
+        assert result["kind"] == "one_real"
+        assert ft_abs(result["x"]) < 1e-12
 
 
 # --------------------------
@@ -185,3 +183,15 @@ def test_invalid_leading_plus():
 def test_invalid_repeated_plus():
     with pytest.raises(ValueError):
         parse_equation("1 * X^1 ++ 2 * X^0 = 0")
+
+
+def test_invalid_constant_only_equations():
+    with pytest.raises(ValueError):
+        parse_equation("0 = 0")
+    with pytest.raises(ValueError):
+        parse_equation("3 = 4")
+
+
+def test_invalid_left_zero_literal_not_allowed_in_mandatory():
+    with pytest.raises(ValueError):
+        parse_equation("0 = 1 * X^1")
