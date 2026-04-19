@@ -24,6 +24,8 @@ Supports equations of degree `<= 2` (mandatory) with additional bonus features.
 ```text
 computorv1/
 ├── computor.py           # CLI entrypoint
+├── constants.py          # global constants (EPS, precision bounds, max degree)
+├── shared_types.py       # shared type aliases (Term, Terms, Coeffs, ParsedEquation)
 ├── parser.py             # parser mode dispatcher
 ├── parser_strict.py      # mandatory parser
 ├── parser_free.py        # bonus free-form parser
@@ -34,6 +36,10 @@ computorv1/
 ├── docs/
 │   └── knowledge.md      # math-only project knowledge base
 └── tests/                # mandatory + bonus tests
+    ├── test_mandatory_main.py
+    ├── test_mandatory_plus.py
+    ├── test_bonus_free.py
+    └── test_bonus_cli.py
 ```
 
 ---
