@@ -30,7 +30,7 @@ def _print_steps(coeffs: dict[int, float], degree: int) -> None:
     a = coeffs.get(2, 0.0)
     b = coeffs.get(1, 0.0)
     c = coeffs.get(0, 0.0)
-    print(f"[steps] a={a}, b={b}, c={c}")
+    print(f"[steps] a = {a}, b = {b}, c = {c}")
     if degree == 2:
         delta = b * b - 4.0 * a * c
         print(f"[steps] Δ = b² - 4ac = {delta}")
@@ -41,7 +41,7 @@ def _solve_once(equation: str, parser_mode: str, *, steps: bool, precision: int,
     coeffs = reduce_terms(lhs_terms, rhs_terms)
     degree = polynomial_degree(coeffs)
 
-    print(f"Reduced form: {format_reduced_form(coeffs, precision=precision)}")
+    print(f"Reduced form: {format_reduced_form(coeffs, precision=precision, style=parser_mode)}")
     print(f"Polynomial degree: {degree}")
 
     result = solve_polynomial(coeffs, degree)

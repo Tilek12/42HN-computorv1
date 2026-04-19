@@ -17,8 +17,27 @@ def _highest_non_zero_power(coeffs: dict[int, float]) -> int:
     return max(powers) if powers else 0
 
 
-def format_reduced_form(coeffs: dict[int, float], *, precision: int = 6) -> str:
-    """Subject-style reduced form from X^0 up to highest non-zero power."""
+def _format_term_abs(coeff_abs: float, power: int, precision: int, style: str) -> str:
+    c = format_number(coeff_abs, precision)
+
+    if style == "free":
+        if power == 0:
+            return c
+        if power == 1:
+            return f"{c} * X"
+        return f"{c} * X^{power}"
+
+    # strict (default / mandatory style)
+    return f"{c} * X^{power}"
+
+
+def format_reduced_form(
+    coeffs: dict[int, float],
+    *,
+    precision: int = 6,
+    style: str = "strict",
+) -> str:
+    """Reduced form. strict: a * X^p, free: constants/X shown more naturally."""
     if not coeffs:
         return "0 * X^0 = 0"
 
@@ -29,13 +48,21 @@ def format_reduced_form(coeffs: dict[int, float], *, precision: int = 6) -> str:
     parts: list[str] = []
     for power in range(0, max_power + 1):
         coeff = coeffs.get(power, 0.0)
-        term = f"{format_number(ft_abs(coeff), precision)} * X^{power}"
+
+        # In free mode, hide zero terms for cleaner output.
+        if style == "free" and is_zero(coeff):
+            continue
+
+        term = _format_term_abs(ft_abs(coeff), power, precision, style)
 
         if not parts:
             parts.append(f"-{term}" if coeff < 0 else term)
         else:
             sign = "-" if coeff < 0 else "+"
             parts.append(f"{sign} {term}")
+
+    if not parts:
+        return "0 * X^0 = 0"
 
     return " ".join(parts) + " = 0"
 
