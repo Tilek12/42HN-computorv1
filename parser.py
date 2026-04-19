@@ -1,10 +1,9 @@
 from parser_strict import parse_equation_strict
 from parser_free import parse_equation_free
+from shared_types import ParsedEquation
 
-Term = tuple[float, int]
 
-
-def parse_equation(equation: str, mode: str = "strict") -> tuple[list[Term], list[Term]]:
+def parse_equation(equation: str, mode: str = "strict") -> ParsedEquation:
     if mode == "strict":
         return parse_equation_strict(equation)
     if mode == "free":

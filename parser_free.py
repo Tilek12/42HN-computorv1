@@ -1,6 +1,6 @@
 import re
+from shared_types import Term, Terms, ParsedEquation
 
-Term = tuple[float, int]
 
 NUM_RE = re.compile(r"^\d+(?:\.\d+)?$")
 ALLOWED_CHARS_RE = re.compile(r"^[0-9Xx+\-*/^.\s=]+$")
@@ -93,7 +93,7 @@ def _parse_token(token: str) -> Term:
     return sign * coeff, power
 
 
-def parse_side_free(side: str) -> list[Term]:
+def parse_side_free(side: str) -> Terms:
     compact_side = _compact(side)
 
     if not compact_side:
@@ -106,12 +106,15 @@ def parse_side_free(side: str) -> list[Term]:
         raise ValueError("Invalid syntax: trailing operator")
     if "**" in compact_side or "//" in compact_side:
         raise ValueError("Invalid operator sequence in expression")
+    for bad in ("++", "--", "+-", "-+"):
+        if bad in compact_side:
+            raise ValueError("Invalid syntax: repeated operators")
 
     tokens = _split_terms(compact_side)
     return [_parse_token(tok) for tok in tokens]
 
 
-def parse_equation_free(equation: str) -> tuple[list[Term], list[Term]]:
+def parse_equation_free(equation: str) -> ParsedEquation:
     if not equation or not equation.strip():
         raise ValueError("Equation must not be empty")
     _validate_chars(equation)

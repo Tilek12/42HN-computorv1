@@ -1,6 +1,6 @@
 import re
+from shared_types import ParsedEquation, Terms
 
-Term = tuple[float, int]
 
 TERM_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)\*X\^(\d+)$")
 CONST_RE = re.compile(r"^([+-]?\d+(?:\.\d+)?)$")
@@ -37,13 +37,13 @@ def _validate_side_syntax(compact_side: str) -> None:
             raise ValueError("Invalid syntax: repeated operators")
 
 
-def parse_side_strict(side: str, *, allow_zero_literal: bool) -> list[Term]:
+def parse_side_strict(side: str, *, allow_zero_literal: bool) -> Terms:
     """Parse one side in mandatory strict mode (a*X^p only)."""
     compact_side = _compact(side)
     _validate_side_syntax(compact_side)
 
     tokens = _split_terms(compact_side)
-    terms: list[Term] = []
+    terms: Terms = []
 
     for token in tokens:
         m = TERM_RE.match(token)
@@ -69,7 +69,7 @@ def parse_side_strict(side: str, *, allow_zero_literal: bool) -> list[Term]:
     return terms
 
 
-def parse_equation_strict(equation: str) -> tuple[list[Term], list[Term]]:
+def parse_equation_strict(equation: str) -> ParsedEquation:
     if not equation or not equation.strip():
         raise ValueError("Equation must not be empty")
     if equation.count("=") != 1:

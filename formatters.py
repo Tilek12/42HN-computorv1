@@ -1,7 +1,9 @@
 from math_utils import ft_abs, is_zero, ft_fraction_str
+from constants import DEFAULT_PRECISION
+from shared_types import Coeffs
 
 
-def format_number(value: float, precision: int = 6) -> str:
+def format_number(value: float, precision: int = DEFAULT_PRECISION) -> str:
     """Format float using fixed precision with trimmed trailing zeros."""
     if float(value).is_integer():
         return str(int(value))
@@ -12,7 +14,7 @@ def _format_fraction(value: float) -> str:
     return ft_fraction_str(value)
 
 
-def _highest_non_zero_power(coeffs: dict[int, float]) -> int:
+def _highest_non_zero_power(coeffs: Coeffs) -> int:
     powers = [p for p, c in coeffs.items() if not is_zero(c)]
     return max(powers) if powers else 0
 
@@ -32,9 +34,9 @@ def _format_term_abs(coeff_abs: float, power: int, precision: int, style: str) -
 
 
 def format_reduced_form(
-    coeffs: dict[int, float],
+    coeffs: Coeffs,
     *,
-    precision: int = 6,
+    precision: int = DEFAULT_PRECISION,
     style: str = "strict",
 ) -> str:
     """Reduced form. strict: a * X^p, free: constants/X shown more naturally."""
@@ -67,7 +69,7 @@ def format_reduced_form(
     return " ".join(parts) + " = 0"
 
 
-def format_solution(result: dict, *, precision: int = 6, fraction: bool = False) -> str:
+def format_solution(result: dict, *, precision: int = DEFAULT_PRECISION, fraction: bool = False) -> str:
     kind = result["kind"]
 
     if kind == "unsupported_degree":

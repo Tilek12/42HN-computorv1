@@ -37,7 +37,8 @@ def test_cli_strict_rejects_free_form_when_default_strict():
 def test_cli_steps_flag_shows_intermediate_values():
     code, out = run_cli(["--steps", "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"])
     assert code == 0
-    assert "[steps] a=" in out
+    assert "[steps]" in out
+    assert "a = " in out and "b = " in out and "c = " in out
     assert "[steps] Δ = b² - 4ac =" in out
 
 

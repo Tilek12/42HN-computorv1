@@ -1,4 +1,4 @@
-EPS = 1e-12
+from constants import EPS, MIN_PRECISION, MAX_PRECISION
 
 
 def is_zero(value: float, eps: float = EPS) -> bool:
@@ -22,7 +22,7 @@ def ft_sqrt(value: float, eps: float = EPS, max_iter: int = 10_000) -> float:
         if ft_abs(nx - x) < eps:
             return nx
         x = nx
-
+    
     raise RuntimeError("ft_sqrt did not converge")
 
 
@@ -42,10 +42,10 @@ def ft_to_fraction(value: float, precision: int = 12) -> tuple[int, int]:
     if is_zero(value):
         return 0, 1
 
-    if precision < 0:
-        precision = 0
-    if precision > 15:
-        precision = 15
+    if precision < MIN_PRECISION:
+        precision = MIN_PRECISION
+    if precision > MAX_PRECISION:
+        precision = MAX_PRECISION
 
     sign = -1 if value < 0 else 1
     abs_value = -value if value < 0 else value

@@ -4,6 +4,7 @@ from parser import parse_equation
 from reducer import reduce_terms, polynomial_degree
 from formatters import format_reduced_form, format_solution
 from solver import solve_polynomial
+from constants import MIN_PRECISION, MAX_PRECISION, DEFAULT_PRECISION
 
 
 def _build_args() -> argparse.Namespace:
@@ -15,15 +16,15 @@ def _build_args() -> argparse.Namespace:
 
     parser.add_argument("--steps", action="store_true", help="Show intermediate steps")
     parser.add_argument("--fraction", action="store_true", help="Show solutions as irreducible fractions")
-    parser.add_argument("--precision", type=int, default=6, help="Decimal precision for float output")
+    parser.add_argument("--precision", type=int, default=DEFAULT_PRECISION, help="Decimal precision for float output")
     parser.add_argument("--repl", action="store_true", help="Interactive mode")
     parser.add_argument("equation", nargs="?", help='Equation string, e.g. "5 * X^0 + 4 * X^1 = 4 * X^0"')
     return parser.parse_args()
 
 
 def _validate_precision(precision: int) -> None:
-    if precision < 0 or precision > 15:
-        raise ValueError("Precision must be between 0 and 15")
+    if precision < MIN_PRECISION or precision > MAX_PRECISION:
+        raise ValueError(f"Precision must be between {MIN_PRECISION} and {MAX_PRECISION}")
 
 
 def _print_steps(coeffs: dict[int, float], degree: int) -> None:
