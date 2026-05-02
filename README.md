@@ -1,9 +1,18 @@
-# Computor v1
+# :desktop_computer: 42Heilbronn :de:
+
+<h1 align="center">
+  ComputorV1 :computer:
+  <h2 align="center">
+    :white_check_mark: 125/125
+  </h2>
+</h1>
+
+## :clipboard: Project info: [subject](https://github.com/Tilek12/42HN-computorv1/blob/master/docs/en.subject-computorv1.pdf)
 
 A polynomial equation solver.  
 Supports equations of degree `<= 2` (mandatory) with additional bonus features.
 
-## Highlights
+## :pushpin: Highlights
 
 - Mandatory strict parser (`a * X^p`)
 - Bonus free-form parser (examples: `2X^2-3X+1=0`, `X=5`)
@@ -19,7 +28,7 @@ Supports equations of degree `<= 2` (mandatory) with additional bonus features.
 
 ---
 
-## Project structure
+## :bookmark_tabs: Project structure
 
 ```text
 computorv1/
@@ -44,7 +53,7 @@ computorv1/
 
 ---
 
-## Requirements
+## :gear: Requirements
 
 - Linux
 - Python 3.10+
@@ -52,7 +61,7 @@ computorv1/
 
 ---
 
-## Setup (Linux)
+## :minidisc: Setup (Linux)
 
 ```bash
 # Check Python
@@ -73,7 +82,7 @@ python -m pip install pytest
 
 ---
 
-## Test commands
+## :repeat: Test commands
 
 ```bash
 # Run full suite
@@ -94,16 +103,16 @@ python -m pytest -v tests/test_bonus_free.py::test_free_accepts_subject_bonus_ex
 
 ---
 
-## Usage
+## :keyboard: Usage
 
-## 1) Strict mode (default, mandatory-safe)
+## :green_circle: 1) Strict mode (default)
 
 ```bash
 python computor.py "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
 python computor.py --strict "5 * X^0 + 4 * X^1 = 4 * X^0"
 ```
 
-## 2) Free mode (bonus)
+## :green_circle: 2) Free mode (bonus)
 
 ```bash
 python computor.py --free "5 + 4 * X + X^2 = X^2"
@@ -111,7 +120,7 @@ python computor.py --free "2X^2-3X+1=0"
 python computor.py --free "X=5"
 ```
 
-## 3) Extra flags
+## :green_circle: 3) Extra flags (bonus)
 
 ```bash
 # Show intermediate values (a, b, c, Δ)
@@ -127,7 +136,7 @@ python computor.py --precision 3 "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
 python computor.py --free --steps --fraction --precision 5 "2X^2-3X+1=0"
 ```
 
-## 4) REPL mode
+## :green_circle: 4) REPL mode (bonus)
 
 ```bash
 python computor.py --repl
@@ -138,7 +147,7 @@ Type `exit` or `quit` to stop.
 
 ---
 
-## Notes
+## :spiral_notepad: Notes
 
 - Keep mandatory evaluations in strict mode.
 - Free-form parsing is bonus and enabled explicitly via `--free`.
